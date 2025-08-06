@@ -1,6 +1,8 @@
-chunk_size_kb: 4096
+chunk_size_kb: 1024 #recommend
+data_shards: 10
+parity_shards: 3
 argon2:
-  time: 1
+  time: 3 # Increased from 1 for better security
   memory_kb: 65536
   threads: 4
-storage_path: "./storage"
+storage_path: "/var/secstorage/data" # Changed to absolute path
