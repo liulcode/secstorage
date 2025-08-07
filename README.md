@@ -11,7 +11,7 @@ import (
 	"fmt"
 	"log"
 
-	secstorage "github.com/liulcode/secstorage/core"
+	secstorage "github.com/liulcode/secstorage"
 )
 
 func main() {
@@ -21,8 +21,8 @@ func main() {
 	// }
 
 	storageDir := "./storage"
-	ChunkSizeKB := 4096
-	argon2Time := 1
+	ChunkSizeKB := 1024
+	argon2Time := 3
 	argon2MemoryKB := 65536
 	argon2Threads := 4
 
@@ -41,16 +41,26 @@ func main() {
 
 	syncer := secstorage.NewSyncer(storageDir)
 
+	options := secstorage.EncryptionOptions{
+		Password:      password,
+		DataShards:    10,
+		ParityShards:  3,
+		ChunkSizeKB:   ChunkSizeKB,
+		Argon2Time:    uint32(argon2Time),
+		Argon2Memory:  uint32(argon2MemoryKB),
+		Argon2Threads: uint8(argon2Threads),
+	}
+
 	//加密文件
-	manifestID, err := syncer.EncryptFile("./testfile.txt", password, ChunkSizeKB, uint32(argon2Time), uint32(argon2MemoryKB), uint8(argon2Threads))
+	manifestID, err := syncer.EncryptFile("./testfile.txt", options)
 	//此处manifestID为加密后的文件目录，后续解密需要传递这个目录（可任意修改）
 	if err != nil {
-		log.Fatalf("加密文件是不: %v", err)
+		log.Fatalf("加密文件失败: %v", err)
 	}
 	fmt.Printf("加密文件成功. 加密后的文件目录为: %s\n", manifestID)
 
 	//解密还原文件
-	if err := syncer.DecryptFile(manifestID, "./abc.txt", password); err != nil {
+	if err := syncer.DecryptFile("manifestID", "", password); err != nil {
 		log.Fatalf("还原文件失败: %v", err)
 	}
 	fmt.Println("还原文件成功")
